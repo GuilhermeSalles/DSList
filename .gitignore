@@ -31,3 +31,12 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Docker ###
+*.env
+docker-compose.override.yml
+data/
+*.log
+
+### Ignorar diretório .data ###
+.data/
