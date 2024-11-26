@@ -1,0 +1,55 @@
+version: "3.9"
+services:
+  # PostgreSQL
+  pg-docker:
+    image: postgres:14-alpine
+    container_name: dev-postgresql
+    environment:
+      POSTGRES_DB: mydatabase
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234567
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./.data/postgresql/data:/var/lib/postgresql/data
+    networks:
+      - dev-network
+
+  # PgAdmin
+  pgadmin-docker:
+    image: dpage/pgadmin4
+    container_name: dev-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: me@example.com
+      PGADMIN_DEFAULT_PASSWORD: 1234567
+    ports:
+      - "5050:80"
+    volumes:
+      - ./.data/pgadmin:/var/lib/pgadmin
+    depends_on:
+      - pg-docker
+    networks:
+      - dev-network
+
+  # Aplicação Spring Boot
+  spring-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dev-spring-app
+    environment:
+      APP_PROFILE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://pg-docker:5432/mydatabase
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 1234567
+    ports:
+      - "8080:8080"
+    depends_on:
+      - pg-docker
+    networks:
+      - dev-network
+
+# Rede compartilhada
+networks:
+  dev-network:
+    driver: bridge
